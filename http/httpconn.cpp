@@ -41,7 +41,7 @@ ssize_t HttpConn::read(int* saveErrno){
 ssize_t HttpConn::write(int* saveErrno){
     ssize_t len = -1;
     do {
-        len = writev(fd_, iov_, iovCnt_);  //分散去写 //文件描述符 内存块 内存块数量
+        len = writev(fd_, iov_, iovCnt_);  //集中写 //文件描述符 内存块 内存块数量
         if(len <= 0) {
             *saveErrno = errno;
             break;
@@ -107,7 +107,7 @@ bool HttpConn::process(){
 
     response_.MakeResponse(writeBuff_); //响应保存在writeBuff_里面
     
-    /* 响应头 */ //分散的写
+    /* 响应头 */ //集中写
     iov_[0].iov_base = const_cast<char*>(writeBuff_.Peek()); 
     iov_[0].iov_len = writeBuff_.ReadableBytes(); 
     //cout<<"iov_[0].iov_len "<<iov_[0].iov_len<<endl;

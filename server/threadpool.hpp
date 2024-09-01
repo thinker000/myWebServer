@@ -11,7 +11,6 @@ class ThreadPool{
 public:
     explicit ThreadPool(size_t threadCount = 8): pool_(std::make_shared<Pool>()){
         assert(threadCount > 0); //断言
-
         //创建threadCount个子线程
         for(size_t i = 0; i < threadCount; i++) {
             std::thread([pool = pool_] {
@@ -40,7 +39,7 @@ public:
                 std::lock_guard<std::mutex> locker(pool_->mtx);
                 pool_->isClosed = true;
             }
-            pool_->cond.notify_all(); //
+            pool_->cond.notify_all(); //线程池销毁时唤醒所有线程使其退出。
         }
     }
 

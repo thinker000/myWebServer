@@ -3,8 +3,7 @@
 using namespace std;
 
 WebServer::WebServer(
-	int port, int trigMode,
-	int connPoolNum, int threadNum) :
+	int port, int trigMode,int threadNum) :
 	port_(port), isClose_(false),
 	threadpool_(new ThreadPool(threadNum)), epoller_(new Epoller())
 {
@@ -37,18 +36,18 @@ void WebServer::_Start() {
             uint32_t events = epoller_->GetEvents(i);
             
             cout<<"判断事件的文件描述符"<<endl;
-            if(fd == listenFd_) {
+            if(fd == listenFd_) {    //新的请求建立连接
                 DealListen_();
             }
             else if(events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
                 assert(users_.count(fd) > 0);
                 CloseConn_(&users_[fd]);
             }
-            else if(events & EPOLLIN) { 
+            else if(events & EPOLLIN) {      //有数据到达
                 assert(users_.count(fd) > 0);
                 DealRead_(&users_[fd]);
             }
-            else if(events & EPOLLOUT) { 
+            else if(events & EPOLLOUT) {     
                 assert(users_.count(fd) > 0);
                 DealWrite_(&users_[fd]);
             } 
@@ -223,7 +222,6 @@ void WebServer::OnWrite_(HttpConn* client){
             return;
         }
     }
-    //sleep(5000);
     CloseConn_(client);
 }
 

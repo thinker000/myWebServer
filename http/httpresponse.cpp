@@ -25,10 +25,10 @@ const unordered_map<string, string> HttpResponse::SUFFIX_TYPE = {
 };
 
 const unordered_map<int, string> HttpResponse::CODE_STATUS = {
-    { 200, "OK" },
-    { 400, "Bad Request" },
-    { 403, "Forbidden" },
-    { 404, "Not Found" }
+    { 200, "OK" },          //成功处理请求
+    { 400, "Bad Request" }, //无法理解客户端请求
+    { 403, "Forbidden" },   //没有权限
+    { 404, "Not Found" }    //为找到请求的资源
 };
 
 const unordered_map<int, string> HttpResponse::CODE_PATH = {
@@ -70,7 +70,7 @@ void HttpResponse::MakeResponse(Buffer& buff) {
     //pathname:指定文件的路径
     //buf:用来存储文件元数据的空间地址
     //return : 成功返回 0 ，失败返回 -1  error被重置
-        //S_ISDIR()宏，判断指定路径是否是目录
+    //S_ISDIR()宏，判断指定路径是否是目录
     if(stat((srcDir_ + path_).data(), &mmFileStat_) < 0 || S_ISDIR(mmFileStat_.st_mode)) {
         code_ = 404; //访问的是目录
     }
@@ -205,7 +205,7 @@ void HttpResponse::AddPostContent_(Buffer& buff){
 
     int sum = a + b;
     string body;
-    body += "<html><head><title>niliushall's CGI</title></head>";
+    body += "<html><head><title>CGI</title></head>";
     body += "<body><p>The result is " + to_string(a) + "+" + to_string(b) + " = " + to_string(sum);
     body += "</p></body></html>";
 

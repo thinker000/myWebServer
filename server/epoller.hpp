@@ -14,7 +14,7 @@ public:
 
     ~Epoller();
 
-    bool AddFd(int fd, uint32_t events);
+    bool AddFd(int fd, uint32_t events);  //文件描述符，事件类型符号
 
     bool ModFd(int fd, uint32_t events); 
 

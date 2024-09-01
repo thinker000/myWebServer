@@ -14,13 +14,13 @@ size_t Buffer::PrependableBytes() const{  //读取位置之前可用的空间
     return readPos_;                        
 }
 
-const char* Buffer::Peek() const{      //返回当前读取位置的数据指针(地址)
+const char* Buffer::Peek() const{           //返回当前读取位置的数据指针(地址)
     return BeginPtr_() + readPos_;
 }
 
 void Buffer::EnsureWriteable(size_t len){  //确保缓冲区中有足够的空间来写入给定数量的字节数
     if(WritableBytes() < len) { 
-        MakeSpace_(len); //对容器的操作（扩容 或者 拷贝移动数据）
+        MakeSpace_(len);                    //对容器的操作（扩容 或者 拷贝移动数据）
     }
     assert(WritableBytes() >= len);
 }
@@ -71,30 +71,6 @@ ssize_t Buffer::ReadFd(int fd, int* saveErrno){
     iov[0].iov_len = writable; 
     iov[1].iov_base = buff;
     iov[1].iov_len = sizeof(buff);
-
-    /*
-        功能：将数据从文件描述符读到分散的内存块中，即分散读
-        ssize_t readv(int fd, const struct iovec* iov,int iovcnt);
-        参数：   fd     文件描述符
-                iov     指向iovec结构体数组的指针
-                iovcnt  指定iovec的个数 
-        返回值： 成功时返回读写的总字节数，失败时返回-1，并设置相应的errno
-    */
-   /*
-        功能: 将多块分散的内存的内存数据一并写入到文件描述符中，即集中写
-        ssize_t writev(int fd,const struct iovec* iov,int iovcnt);
-        参数：   fd     文件描述符
-                iov     指向iovec结构体数组的指针
-                iovcnt  指定iovec的个数 
-        返回值： 成功时返回写入的总字节数，失败时返回-1，并设置相应的errno
-   */
-   /*
-        #include<sys/uio.h>
-        struct iovec{
-            void* iov_base;         //缓冲区首地址
-            size_t iov_len;         //缓冲区长度
-        };
-   */
     const ssize_t len = readv(fd, iov, 2);     
     if(len < 0) {
         *saveErrno = errno;
@@ -133,3 +109,30 @@ void Buffer::MakeSpace_(size_t len) {
         assert(readable == ReadableBytes());
     }
 }
+
+
+
+
+    /*
+        功能：将数据从文件描述符读到分散的内存块中，即分散读
+        ssize_t readv(int fd, const struct iovec* iov,int iovcnt);
+        参数：   fd     文件描述符
+                iov     指向iovec结构体数组的指针
+                iovcnt  指定iovec的个数 
+        返回值： 成功时返回读写的总字节数，失败时返回-1，并设置相应的errno
+    */
+   /*
+        功能: 将多块分散的内存的内存数据一并写入到文件描述符中，即集中写
+        ssize_t writev(int fd,const struct iovec* iov,int iovcnt);
+        参数：   fd     文件描述符
+                iov     指向iovec结构体数组的指针
+                iovcnt  指定iovec的个数 
+        返回值： 成功时返回写入的总字节数，失败时返回-1，并设置相应的errno
+   */
+   /*
+        #include<sys/uio.h>
+        struct iovec{
+            void* iov_base;         //缓冲区首地址
+            size_t iov_len;         //缓冲区长度
+        };
+   */
