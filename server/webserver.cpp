@@ -3,10 +3,13 @@
 using namespace std;
 
 WebServer::WebServer(
-	int port, int trigMode,int threadNum) :
+	int port, int trigMode) :
 	port_(port), isClose_(false),
-	threadpool_(new ThreadPool(threadNum)), epoller_(new Epoller())
+	threadpool_(new Threadpool()), epoller_(new Epoller())
 {
+    threadpool_->setMode(Mode::VARIABLE);
+    threadpool_->setThreadCountThreshold(24);
+    threadpool_->start(12);
 	srcDir_ = getcwd(nullptr, 256); //获取当前的工作路径
 	assert(srcDir_);
 	strncat(srcDir_, "/resources/", 16); //c语言追加字符串函数
@@ -165,14 +168,14 @@ void WebServer::DealRead_(HttpConn* client) {
     cout<<"开始处理读事件"<<endl;
     assert(client);
     //由线程池中的工作线程处理事件————Reactor模式
-    threadpool_->AddTask(std::bind(&WebServer::OnRead_, this, client)); //读事件
+    threadpool_->submitTask(std::bind(&WebServer::OnRead_, this, client)); //读事件
 }
 
 void WebServer::DealWrite_(HttpConn* client) {
     cout<<"开始处理写事件"<<endl;
     assert(client);
     //由线程池中的工作线程处理事件————Reactor模式
-    threadpool_->AddTask(std::bind(&WebServer::OnWrite_, this, client)); //写事件
+    threadpool_->submitTask(std::bind(&WebServer::OnWrite_, this, client)); //写事件
 }
 
 void WebServer::SendError_(int fd, const char*info) {

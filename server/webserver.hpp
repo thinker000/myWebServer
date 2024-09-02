@@ -12,13 +12,13 @@
 #include <arpa/inet.h>
 
 #include "epoller.hpp"
-#include "threadpool.hpp"
+#include "../threadpool/threadpools.hpp"
 #include "../http/httpconn.hpp"
 
 class WebServer
 {
 public:
-    WebServer(int port, int trigMode, int threadNum);
+    WebServer(int port, int trigMode);
 
     ~WebServer();
 
@@ -52,7 +52,7 @@ private:
     uint32_t listenEvent_;
     uint32_t connEvent_;
 
-    std::unique_ptr<ThreadPool> threadpool_;  // 线程池
+    std::unique_ptr<Threadpool> threadpool_;  // 线程池
     std::unique_ptr<Epoller> epoller_;        // epoll对象
     std::unordered_map<int, HttpConn> users_; // 保存的是客户端连接的信息（哈希表：文件描述符-http连接）
 };
