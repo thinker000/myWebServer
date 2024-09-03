@@ -24,7 +24,7 @@ void HttpConn::init(int fd, const sockaddr_in& addr) {
     writeBuff_.RetrieveAll(); //重置写缓冲区，初始化读写位置
     readBuff_.RetrieveAll(); //重置读缓冲区，初始化读写位置
     isClose_ = false; 
-    cout<<"Client："<<fd_<< GetIP()<<" : "<<GetPort()<<"joined, userCount："<<(int)userCount<<endl;
+    cout<<"Client:"<<fd_<< GetIP()<<" : "<<GetPort()<<"joined, userCount："<<(int)userCount<<endl;
 }
 
 ssize_t HttpConn::read(int* saveErrno){

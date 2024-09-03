@@ -55,7 +55,7 @@ private:
     bool isClose_; 
     
     int iovCnt_;
-    struct iovec iov_[2]; //定义了一个向量元素  分散的内存
+    struct iovec iov_[2]; //定义了一个向量元素  分散的内存    用于存放响应数据
     
     Buffer readBuff_; // 读（请求）缓冲区 
     Buffer writeBuff_; // 写（响应）缓冲区 
