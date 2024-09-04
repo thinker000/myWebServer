@@ -1,7 +1,5 @@
 #include "httprequest.hpp"
 
-using namespace std;
-
 const std::unordered_set<std::string> HttpRequest::DEFAULT_HTML{
     "/index", "/compute", "/picture", "/video", "/error",
 };
@@ -20,7 +18,7 @@ bool HttpRequest::parse(Buffer& buff) {
     }
     while(buff.ReadableBytes() && state_ != FINISH) {
         //获取一行数据，根据\r\n为结束标志
-        const char* lineEnd = search(buff.Peek(), buff.BeginWriteConst(), CRLF, CRLF + 2);
+        const char* lineEnd = std::search(buff.Peek(), buff.BeginWriteConst(), CRLF, CRLF + 2);
         //serach()参数：第一个范围内[ first1,last1 ]中有没有第二个范围[ first2,last2 ],相当于找子串，
         //返回查找到第一个子序列的第一个元素迭代器(也称指针)，如果查找失败，则该迭代器的指向和 last1 迭代器相同。 
         std::string line(buff.Peek(), lineEnd); //封装在line里
@@ -30,7 +28,7 @@ bool HttpRequest::parse(Buffer& buff) {
             if(!ParseRequestLine_(line)) {
                 return false;
             }
-            ParsePath_(); 
+            ParsePath_(); // 解析URL中的文件路径
             break;    
         case HEADERS:
             ParseHeader_(line);
@@ -48,7 +46,7 @@ bool HttpRequest::parse(Buffer& buff) {
         buff.RetrieveUntil(lineEnd + 2);  //移动缓冲区的读指针
     }
 
-    cout<<"解析结果  method_:"<<method_.c_str()<<" path_:"<< path_.c_str()<<" version_:"<< version_.c_str()<<endl;
+    std::cout<<"解析结果  method_:"<<method_.c_str()<<" path_:"<< path_.c_str()<<" version_:"<< version_.c_str()<<std::endl;
     return true;
 }
 
@@ -76,26 +74,26 @@ bool HttpRequest::IsKeepAlive() const {
     return false;
 }
 
-bool HttpRequest::ParseRequestLine_(const string& line) {
+bool HttpRequest::ParseRequestLine_(const std::string& line) {
     // GET / HTTP/1.1  //^开头 ()一组 []满足[]里面的一些字符  *任意多个  $结尾
-    regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");  //[^ ]* 匹配任何多个非空格字符   ^表示字符串的开头 $字符串的结尾
-    smatch subMatch;
-    if(regex_match(line, subMatch, patten)) {  //匹配成功就保存在subMatch里面
+    std::regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");  //[^ ]* 匹配任何多个非空格字符   ^表示字符串的开头 $字符串的结尾
+    std::smatch subMatch;
+    if(std::regex_match(line, subMatch, patten)) {  //匹配成功就保存在subMatch里面
         method_ = subMatch[1]; // GET        //match[1]将包含使用第一个捕获组(第一个括号括起的模式部分)捕获的文本等
         path_ = subMatch[2]; //  /请求路径    //同理
         version_ = subMatch[3]; // 1.1       //同理
         state_ = HEADERS; //状态改变 解析头
         return true;
     }
-    cout<<"RequestLine Error"<<endl;
+    std::cout<<"RequestLine Error"<<std::endl;
     return false;
 }
 
-void HttpRequest::ParseHeader_(const string& line) {
+void HttpRequest::ParseHeader_(const std::string& line) {
     //?前面的元素重复0次或1次  .匹配任意单个字符
-    regex patten("^([^:]*): ?(.*)$"); //前面是键 后面是值
-    smatch subMatch;
-    if(regex_match(line, subMatch, patten)) { 
+    std::regex patten("^([^:]*): ?(.*)$"); //前面是键 后面是值
+    std::smatch subMatch;
+    if(std::regex_match(line, subMatch, patten)) { 
         header_[subMatch[1]] = subMatch[2];  //以map的形式存储请求头
         //cout<<"头"<<header_[subMatch[1]] <<" "<< subMatch[2]<<endl;
     }
@@ -104,11 +102,11 @@ void HttpRequest::ParseHeader_(const string& line) {
     }
 }
 
-void HttpRequest::ParseBody_(const string& line) {
+void HttpRequest::ParseBody_(const std::string& line) {
     body_ = line;
     ParsePost_();
     state_ = FINISH;
-    cout<<"Body:"<<line.c_str()<<" len:"<<line.size()<<endl;
+    std::cout<<"Body:"<<line.c_str()<<" len:"<<line.size()<<std::endl;
 }
 
 void HttpRequest::ParsePath_() {
@@ -127,7 +125,7 @@ void HttpRequest::ParsePath_() {
 
 void HttpRequest::ParsePost_(){
     if(method_ == "POST" /*&& header_["Content-Type"] == "application/x-www-form-urlencoded"*/) {
-        cout<<"解析POST请求"<<endl;
+        std::cout<<"解析POST请求"<<std::endl;
         ParseFromUrlencoded_();
         //int len = std::stoi(header_["Content-Length"]);
         //cout<<len<<endl;
@@ -138,7 +136,7 @@ void HttpRequest::ParsePost_(){
 void HttpRequest::ParseFromUrlencoded_() {
     if(body_.size() == 0) { return; }
 
-    string key;
+    std::string key;
     int value;
 
     int n = body_.size();

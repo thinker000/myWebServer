@@ -9,8 +9,14 @@ Threadpool::Threadpool()
 {
 }
 
-Threadpool::~Threadpool()
-{
+Threadpool::~Threadpool() {
+    isRunning_ = false;
+    {
+        std::unique_lock<std::mutex> lock(mtx_);
+        condTaskNotEmpty_.notify_all();  // 唤醒所有等待的线程
+    }
+    std::unique_lock<std::mutex> lock(mtx_);
+    condExit_.wait(lock, [this]() { return threads_.empty(); });  // 等待所有线程退出
 }
 
 // 设置线程池工作模式
